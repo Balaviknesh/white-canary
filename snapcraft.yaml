@@ -1,7 +1,7 @@
 
 name: white-canary  # Replace with your application's name
 base: core20             # The base snap is the execution environment
-version: '1.1'                  # Version of your application
+version: '1.2'                  # Version of your application
 summary: A brief description of your application
 description: A detailed description of your application.
 
@@ -20,6 +20,7 @@ parts:
     stage-packages:             # List the Ubuntu packages needed at runtime
       - libasound2
       - alsa-utils
+      - libpulse0
       - libasound2-plugins
       - libsdl1.2debian
       - libsdl-mixer1.2
