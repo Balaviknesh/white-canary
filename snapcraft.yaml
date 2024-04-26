@@ -1,0 +1,67 @@
+
+name: white-canary  # Replace with your application's name
+base: core20             # The base snap is the execution environment
+version: '1.1'                  # Version of your application
+summary: A brief description of your application
+description: A detailed description of your application.
+
+grade: devel                    # Must be 'stable' to release into candidate/stable channels
+confinement: strict             # Use 'strict' to enforce security and isolation
+
+parts:
+  white-canary:                     # This part name can be anything
+    source: .                   # Use '.' to designate that the source code is in the same directory as the snapcraft.yaml
+    plugin: python              # This plugin will use pip to install your Python packages
+    python-packages:
+      - flask                   # Ensure all your Flask dependencies are listed
+      - pygame
+      - requests
+      - wheel
+    stage-packages:             # List the Ubuntu packages needed at runtime
+      - libasound2
+      - alsa-utils
+      - libasound2-plugins
+      - libsdl1.2debian
+      - libsdl-mixer1.2
+      - libportaudio2
+      - ffmpeg
+      - libglu1-mesa
+      - freeglut3
+
+
+  alsa-pulseaudio:
+    plugin: dump
+    source: .
+    override-pull: |
+      mkdir etc -p
+      cat > etc/asound.conf <<EOF
+      pcm.!default {
+          type pulse
+          fallback "sysdefault"
+          hint {
+              show on
+              description "Default ALSA Output (currently PulseAudio Sound Server)"
+          }
+      }
+      ctl.!default {
+          type pulse
+          fallback "sysdefault"
+      }
+      EOF
+
+layout:
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib:
+    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib
+
+
+apps:
+  white-canary:
+    environment:
+      ALSA_CONFIG_PATH: "$SNAP/etc/asound.conf"
+    command: bin/white-canary     # Adjust to how you would run your app
+    plugs:
+      - network                 # Allows networking, e.g., access to the network
+      - network-bind            # Allows binding to network ports
+      - home                    # Grants access to non-hidden files in the user's home directory
+      - audio-playback          # Allows playback of audio
+      - audio-record            # Use if your application needs recording capabilities
